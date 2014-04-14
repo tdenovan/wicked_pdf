@@ -61,7 +61,7 @@ module PdfHelper
       html_string = render_to_string(render_opts)
       options = prerender_header_and_footer(options)
       w = WickedPdf.new(options[:wkhtmltopdf])
-      w.pdf_from_string(html_string, options)
+      options[:show_as_image] ? w.image_from_string( html_string, options) : w.pdf_from_string(html_string, options)
     end
 
     def make_and_send_pdf(pdf_name, options={})
@@ -75,9 +75,11 @@ module PdfHelper
         render_opts.merge!(:file => options[:file]) if options[:file]
         render(render_opts)
       else
+        extension = options[:show_as_image] ? '.png' : '.pdf'
+        type = options[:show_as_image] ? 'image/png' : 'application/pdf'
         pdf_content = make_pdf(options)
         File.open(options[:save_to_file], 'wb') {|file| file << pdf_content } if options[:save_to_file]
-        send_data(pdf_content, :filename => pdf_name + '.pdf', :type => 'application/pdf', :disposition => options[:disposition]) unless options[:save_only]
+        send_data(pdf_content, :filename => pdf_name + extension, :type => type, :disposition => options[:disposition]) unless options[:save_only]
       end
     end
 
