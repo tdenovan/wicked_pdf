@@ -90,7 +90,8 @@ class WickedPdf
     string_file.write(string)
     string_file.close
     generated_pdf_file = WickedPdfTempfile.new("wicked_pdf_generated_file.png", temp_path)
-    command = "\"#{options[:wkhtmltoimage]}\" -f png #{parse_options(options)} \"file:///#{string_file.path}\" \"#{generated_pdf_file.path}\" " # -q for no errors on stdout
+    command = options[:use_xserver] ? "xvfb-run " : ""
+    command += "\"#{options[:wkhtmltoimage]}\" -f png #{parse_options(options)} \"file:///#{string_file.path}\" \"#{generated_pdf_file.path}\" " # -q for no errors on stdout
     print_command(command) if in_development_mode?
     err = Open3.popen3(command) do |stdin, stdout, stderr|
       stderr.read
